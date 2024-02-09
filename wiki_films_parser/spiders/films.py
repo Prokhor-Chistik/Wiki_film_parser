@@ -13,6 +13,13 @@ class FilmsSpider(scrapy.Spider):
         #URL = "https://ru.wikipedia.org/wiki/Байки_из_склепа:_Кровавый_бордель"
         #URL = "https://ru.wikipedia.org/wiki/Александр_(фильм)"
         #URL = "https://ru.wikipedia.org/wiki/Автомобильные_воры"
+        #URL = "https://ru.wikipedia.org/wiki/79,_Парк-авеню"
+        #URL = "https://ru.wikipedia.org/wiki/Красная_река_(фильм)"
+        #URL = "https://ru.wikipedia.org/wiki/42-я_улица_(фильм)"
+        #URL = "https://ru.wikipedia.org/wiki/Затерянные_в_космосе_(фильм)"
+        #URL = "https://ru.wikipedia.org/wiki/44_минуты"
+        #URL = "https://ru.wikipedia.org/wiki/Атомный_поезд"
+        #URL = "https://ru.wikipedia.org/wiki/Доктор_Кто_(фильм, _1996)"
 
         yield scrapy.Request(url=URL, callback=self.abc_films_parse)
 
@@ -46,37 +53,102 @@ class FilmsSpider(scrapy.Spider):
         for i in response.css('tbody > tr'):
 
             if 'Жанр' in str(i.css('th ::text').get()):
-                for j in i.css('td :last-child'):
-                    if (j.css('::text').get() is not None) and (str(j.css('::text').get()) not in film_genre) and ('[' not in str(j.css('::text').get())) and ('(' not in str(j.css('::text').get())) and (str(j.css('::text').get()) != '\n') and (str(j.css('::text').get()) != ', '):
+                for j in i.css('td a'):
+                    if (
+                        (str(j.css('::text').get()) is not None) and
+                        (str(j.css('::text').get()) not in film_genre) and
+                        ('[' not in str(j.css('::text').get())) and
+                        ('(' not in str(j.css('::text').get())) and
+                        (str(j.css('::text').get()) != '\n') and
+                        (str(j.css('::text').get()) != ', ')
+                    ):
                         if film_genre == '':
                             film_genre += str(j.css('::text').get())
                         else:
                             film_genre += ', ' + str(j.css('::text').get())
 
-            elif 'Режиссёр' in str(i.css('th ::text').get()) and director_count == 0:
+                for j in i.css('td span'):
+                    if (
+                        (str(j.css('::text').get()) is not None) and
+                        (str(j.css('::text').get()) not in film_genre) and
+                        ('[' not in str(j.css('::text').get())) and
+                        ('(' not in str(j.css('::text').get())) and
+                        (str(j.css('::text').get()) != '\n') and
+                        (str(j.css('::text').get()) != ', ')
+                    ):
+                        if film_genre == '':
+                            film_genre += str(j.css('::text').get())
+                        else:
+                            film_genre += ', ' + str(j.css('::text').get())
+
+                film_genre = film_genre.replace('\u00A0', ' ')
+
+            elif ('Режиссёр' in str(i.css('th ::text').get())) and (director_count == 0):
                 director_count = 1
-                for j in i.css('td :last-child'):
-                    if (j.css('::text').get() is not None) and (str(j.css('::text').get()) not in film_director) and ('[' not in str(j.css('::text').get())) and (str(j.css('::text').get()) != '\n') and (str(j.css('::text').get()) != '\u00A0') and ('рус.' not in str(j.css('::text').get())) and ('англ.' not in str(j.css('::text').get())) and (str(j.css('::text').get()) != '\u00A0(') and (str(j.css('::text').get()) != 'ru') and (str(j.css('::text').get()) != 'en'):
+                for j in i.css('td span'):
+                    if (
+                        (str(j.css('::text').get()) is not None) and
+                        (str(j.css('::text').get()) not in film_director) and
+                        ('[' not in str(j.css('::text').get())) and
+                        (str(j.css('::text').get()) != '\n') and
+                        (str(j.css('::text').get()) != '\u00A0') and
+                        ('рус.' not in str(j.css('::text').get())) and
+                        ('англ.' not in str(j.css('::text').get())) and
+                        ('кит.' not in str(j.css('::text').get())) and
+                        (str(j.css('::text').get()) != '\u00A0(') and
+                        (str(j.css('::text').get()) != 'ru') and
+                        (str(j.css('::text').get()) != 'en')
+                    ):
                         if film_director == '':
                             film_director += str(j.css('::text').get())
                         else:
                             film_director += ', ' + str(j.css('::text').get())
 
+                for j in i.css('td a'):
+                    if (
+                        (str(j.css('::text').get()) is not None) and
+                        (str(j.css('::text').get()) not in film_director) and
+                        ('[' not in str(j.css('::text').get())) and
+                        (str(j.css('::text').get()) != '\n') and
+                        (str(j.css('::text').get()) != '\u00A0') and
+                        ('рус.' not in str(j.css('::text').get())) and
+                        ('англ.' not in str(j.css('::text').get())) and
+                        ('кит.' not in str(j.css('::text').get())) and
+                        (str(j.css('::text').get()) != '\u00A0(') and
+                        (str(j.css('::text').get()) != 'ru') and
+                        (str(j.css('::text').get()) != 'en')
+                    ):
+                        if film_director == '':
+                            film_director += str(j.css('::text').get())
+                        else:
+                            film_director += ', ' + str(j.css('::text').get())
+
+                film_director = film_director.replace('\u00A0', ' ')
+
             elif 'Стран' in str(i.css('th ::text').get()):
                 for j in i.css('td :last-child'):
-                    if (j.css('::text').get() is not None) and (str(j.css('::text').get()) not in film_country) and ('[' not in str(j.css('::text').get())) and ('(' not in str(j.css('::text').get())) and (str(j.css('::text').get()) != '\n') and (str(j.css('::text').get()) != '\u00A0') and (str(j.css('::text').get()) != ' '):
+                    if (
+                        (j.css('::text').get() is not None) and
+                        (str(j.css('::text').get()) not in film_country) and
+                        ('[' not in str(j.css('::text').get())) and
+                        ('(' not in str(j.css('::text').get())) and
+                        (str(j.css('::text').get()) != '\n') and
+                        (str(j.css('::text').get()) != '\u00A0') and
+                        (str(j.css('::text').get()) != ' ')
+                    ):
                         if film_country == '':
                             film_country += str(j.css('::text').get())
                         else:
                             film_country += ', ' + str(j.css('::text').get())
 
-            elif (i.css('th ::text').get()) == 'Год':
+            elif (str(i.css('th ::text').get()) == 'Год') or (str(i.css('th ::text').get()) == 'Дата выхода') or (str(i.css('th ::text').get()) == 'Первый показ'):
                 film_year = i.css('td a:last-child ::text').get()
-                if '[' in film_year:
+                if (film_year is None) or ('[' in str(film_year)):
                     film_year = i.css('td a ::text').get()
-                    if '[' in film_year:
-                        film_year = i.css('td ::text').get()
+                    if (film_year is None) or ('[' in str(film_year)):
+                        film_year = str(i.css('td ::text').get())
                         film_year = film_year.replace('\n', '')
+
 
         film_title = str(response.css('tbody > tr:nth-child(1) > th ::text').get())
         if (film_title == 'рус.') or ('\u00A0' in film_title) or (film_title == 'Кровавый бордель'):
